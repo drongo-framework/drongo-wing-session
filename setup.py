@@ -3,7 +3,7 @@
 from setuptools import find_packages, setup
 
 
-VERSION = '1.0.0a0'
+VERSION = '1.0.0a1'
 REPO_URL = 'https://github.com/drongo-framework/drongo-wing-session'
 DOWNLOAD_URL = REPO_URL + '/archive/v{version}.tar.gz'.format(version=VERSION)
 
