@@ -1,36 +1,31 @@
 from drongo.utils import dict2
 
+from wing_database import Database
+
 import uuid
 
 
 class Session(object):
     def __init__(self, app, **config):
         self.app = app
-
         config = dict2.from_dict(config)
+
         self.cookie_name = config.get('cookie_name', '_drongo_sessid')
         self.session_var = config.get('session_var', 'session')
 
         # Load and configure the session storage
-        storage = config.get('storage', 'filesystem')
-        self.storage = None
+        database = config.modules.database
 
-        if storage == 'filesystem':
-            from .storage._filesystem import Filesystem
-            path = config.get('session_path', './.sessions')
-            self.storage = Filesystem(path=path)
-
-        elif storage == 'mongo':
+        if database.type == Database.MONGO:
             from .storage._mongo import Mongo
-            database_module = config.modules.database
+
             collection = config.get('collection', 'session')
             self.storage = Mongo(
-                collection=database_module.instance.get_collection(collection))
+                collection=database.instance.get_collection(collection))
 
-        elif storage == 'redis':
+        elif database.type == Database.REDIS:
             from .storage._redis import Redis
-            database_module = config.modules.database
-            db = database_module.instance.get()
+            db = database.instance.get()
             self.storage = Redis(db=db)
 
         app.add_middleware(self)
@@ -47,3 +42,6 @@ class Session(object):
             self.storage.save(ctx[self.session_var])
             ctx.response.set_cookie(
                 self.cookie_name, ctx[self.session_var]._sessid)
+
+    def get(self, ctx):
+        return ctx[self.session_var]
