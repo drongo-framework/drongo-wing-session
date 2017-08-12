@@ -1,15 +1,11 @@
-from drongo.utils import dict2
-
 from wing_database import Database
+from wing_module import Module
 
 import uuid
 
 
-class Session(object):
-    def __init__(self, app, **config):
-        self.app = app
-        config = dict2.from_dict(config)
-
+class Session(Module):
+    def init(self, config):
         self.cookie_name = config.get('cookie_name', '_drongo_sessid')
         self.session_var = config.get('session_var', 'session')
 
@@ -28,7 +24,7 @@ class Session(object):
             db = database.instance.get()
             self.storage = Redis(db=db)
 
-        app.add_middleware(self)
+        self.app.add_middleware(self)
 
     def before(self, ctx):
         sessid = ctx.request.cookies.get(self.cookie_name)

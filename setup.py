@@ -26,6 +26,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
     ],
     install_requires=[
+        'drongo-wing-module==1.0.0',
         'drongo-wing-database==1.1.0',
     ],
     packages=find_packages(),
