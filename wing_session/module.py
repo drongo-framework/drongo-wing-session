@@ -1,16 +1,24 @@
 from wing_database import Database
 from wing_module import Module
 
+import logging
 import uuid
 
 
 class Session(Module):
+    logger = logging.getLogger('wing_session')
+
     def init(self, config):
+        self.logger.info('Initializing [session] module.')
+
+        self.app.context.modules.session = self
+        self.app.add_middleware(self)
+
         self.cookie_name = config.get('cookie_name', '_drongo_sessid')
         self.session_var = config.get('session_var', 'session')
 
         # Load and configure the session storage
-        database = config.modules.database
+        database = self.app.context.modules.database[config.database]
 
         if database.type == Database.MONGO:
             from .storage._mongo import Mongo
@@ -24,7 +32,6 @@ class Session(Module):
             db = database.instance.get()
             self.storage = Redis(db=db)
 
-        self.app.add_middleware(self)
 
     def before(self, ctx):
         sessid = ctx.request.cookies.get(self.cookie_name)

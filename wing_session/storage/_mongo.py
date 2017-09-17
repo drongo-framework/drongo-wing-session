@@ -1,6 +1,7 @@
 from .common import DEFAULT
 
 from bson.objectid import ObjectId
+from datetime import datetime, timedelta
 
 import pickle
 
@@ -13,7 +14,8 @@ class Mongo(object):
         try:
             sess = self.collection.find_one(dict(_id=ObjectId(session_id)))
             session = pickle.loads(sess['value'])
-        except Exception as _:
+
+        except Exception:
             sess = {'value': DEFAULT}
             session_id = str(self.collection.insert_one(sess).inserted_id)
             session = pickle.loads(sess['value'])
@@ -24,5 +26,8 @@ class Mongo(object):
     def save(self, session):
         session_id = session._sessid
         self.collection.update_one(dict(_id=ObjectId(session_id)), {
-            '$set': {'value': pickle.dumps(session)}
+            '$set': {
+                'value': pickle.dumps(session),
+                'last_updated': datetime.utcnow()
+            }
         })
