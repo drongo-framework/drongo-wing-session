@@ -32,7 +32,6 @@ class Session(Module):
             db = database.instance.get()
             self.storage = Redis(db=db)
 
-
     def before(self, ctx):
         sessid = ctx.request.cookies.get(self.cookie_name)
         if sessid is None:
