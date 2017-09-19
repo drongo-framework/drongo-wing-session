@@ -20,17 +20,26 @@ class Session(Module):
         # Load and configure the session storage
         database = self.app.context.modules.database[config.database]
 
+        self.logger.info('Using database [{name}] for session.'.format(
+            name=config.database
+        ))
+
         if database.type == Database.MONGO:
             from .storage._mongo import Mongo
 
             collection = config.get('collection', 'session')
             self.storage = Mongo(
-                collection=database.instance.get_collection(collection))
+                collection=database.instance.get_collection(collection)
+            )
 
         elif database.type == Database.REDIS:
             from .storage._redis import Redis
             db = database.instance.get()
             self.storage = Redis(db=db)
+
+        else:
+            self.logger.error('Unsupported storage for [session] module.')
+            raise NotImplementedError
 
     def before(self, ctx):
         sessid = ctx.request.cookies.get(self.cookie_name)
