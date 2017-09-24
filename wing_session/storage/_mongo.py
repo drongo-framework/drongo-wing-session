@@ -14,7 +14,6 @@ class Mongo(object):
         return str(self.collection.insert_one({'value': DEFAULT}).inserted_id)
 
     def load(self, session_id):
-        print(session_id)
         try:
             sess = self.collection.find_one(dict(_id=ObjectId(session_id)))
         except Exception:
